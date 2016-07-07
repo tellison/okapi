@@ -156,7 +156,7 @@ public class BMP180Device {
      *             An error occurred reading from the device.
      */
     public synchronized float[] getTemperatureAndPressure() throws IOException {
-        return getTemperaturePressure(BMP180SamplingMode.STANDARD);
+        return getTemperatureAndPressure(BMP180SamplingMode.STANDARD);
     }
 
     /**
@@ -177,7 +177,7 @@ public class BMP180Device {
      * @throws IOException
      *             An error occurred reading from the device.
      */
-    public synchronized float[] getTemperaturePressure(BMP180SamplingMode mode) throws IOException {
+    public synchronized float[] getTemperatureAndPressure(BMP180SamplingMode mode) throws IOException {
         //
         // Temperature
         //
