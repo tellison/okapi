@@ -133,6 +133,19 @@ public class BMP180Device {
         return ((data[0] << 8) & 0xFF00) + (data[1] & 0xFF);
     }
 
+    public float getTemperature() throws IOException {
+
+        long ut = getUncalibratedTemperature();
+
+        // Calculate the temperature compensation factor
+        long t1 = ((ut - ac6) * ac5) >> 15;
+        long t2 = ((long) mc << 11) / (t1 + md);
+        long b5 = t1 + t2;
+
+        // Calculate the real temperature
+        return (float) ((b5 + 8) >> 4) / 10;
+    }
+    
     /**
      * Reads temperature and pressure from the device in standard mode.
      * 
@@ -174,10 +187,10 @@ public class BMP180Device {
         //
         // Temperature
         //
-        int ut = getUncalibratedTemperature();
+        long ut = getUncalibratedTemperature();
 
         // Calculate the temperature compensation factor
-        long t1 = ((long) (ut - ac6) * ac5) >> 15;
+        long t1 = ((ut - ac6) * ac5) >> 15;
         long t2 = ((long) mc << 11) / (t1 + md);
         long b5 = t1 + t2;
 
@@ -187,7 +200,7 @@ public class BMP180Device {
         //
         // Pressure
         //
-        int up = getUncompensatedPressure(mode);
+        long up = getUncompensatedPressure(mode);
 
         // Calculate the true pressure (see device data sheet)
         long b6 = b5 - 4000;
@@ -220,7 +233,7 @@ public class BMP180Device {
     /*
      * Reads the uncalibrated temperature from the device in the given mode.
      */
-    private int getUncalibratedTemperature() throws IOException {
+    private long getUncalibratedTemperature() throws IOException {
         // Write the read temperature command to the command register
         device.write(CONTROL_REGISTER_ADDRESS, READ_TEMPERATURE_COMMAND);
         try {
@@ -240,8 +253,9 @@ public class BMP180Device {
 
     /*
      * Reads the uncompensated pressure from the device in the given mode.
+     * TODO: Where are we sending the required mode?
      */
-    private int getUncompensatedPressure(BMP180SamplingMode mode) throws IOException {
+    private long getUncompensatedPressure(BMP180SamplingMode mode) throws IOException {
         // The pressure command is calculated by the enum
         // Write the read pressure command to the command register
         device.write(CONTROL_REGISTER_ADDRESS, READ_PRESSURE_COMMAND);
@@ -258,7 +272,7 @@ public class BMP180Device {
         }
 
         // Extract the uncompensated pressure as a three byte word
-        int word = ((data[0] << 16) & 0xFF0000) + ((data[1] << 8) & 0xFF00) + (data[2] & 0xFF);
+        long word = ((data[0] << 16) & 0xFF0000) + ((data[1] << 8) & 0xFF00) + (data[2] & 0xFF);
         return (word >> (8 - mode.getOSS()));
     }
 
@@ -282,6 +296,7 @@ public class BMP180Device {
      * 
      * @return a debug string showing information for this device.
      */
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(this.getClass().getSimpleName());
