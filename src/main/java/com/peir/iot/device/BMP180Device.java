@@ -17,6 +17,7 @@
 package com.peir.iot.device;
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.IOException;
 
@@ -32,7 +33,7 @@ import com.pi4j.io.i2c.I2CFactory;
  * digital temperature and pressure sensor</a>.
  *
  */
-public class BMP180Device {
+public class BMP180Device implements Closeable {
 
     // Device information.
     public static final int DEVICE_I2C_ADDRESS = 0x77;
@@ -55,6 +56,7 @@ public class BMP180Device {
 
     // Device reference.
     private I2CDevice device;
+    private volatile I2CBus bus; // Nulled when closed.
 
     // Calibration coefficients for this individual device.
     private short ac1, ac2, ac3;
@@ -69,8 +71,7 @@ public class BMP180Device {
      */
     public BMP180Device() throws IOException {
         super();
-        // TODO: should this bus be closed when the device is discarded?
-        I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
+        bus = I2CFactory.getInstance(I2CBus.BUS_1);
         device = bus.getDevice(DEVICE_I2C_ADDRESS);
         readCalibrationData();
     }
@@ -123,7 +124,9 @@ public class BMP180Device {
      *             if there is an error communicating with the device.
      * @returns the device ID (0x55)
      */
-    public int getChipID() throws IOException {
+    public synchronized int getChipID() throws IOException {
+        checkOpen();
+
         byte[] data = new byte[2];
         int result = device.read(ID_REGISTER_ADDRESS, data, 0, data.length);
         if (result < data.length) {
@@ -172,7 +175,7 @@ public class BMP180Device {
      * @throws IOException
      *             An error occurred reading from the device.
      */
-    public synchronized float[] getTemperatureAndPressure() throws IOException {
+    public float[] getTemperatureAndPressure() throws IOException {
         return getTemperatureAndPressure(BMP180SamplingMode.STANDARD);
     }
 
@@ -194,7 +197,7 @@ public class BMP180Device {
      * @throws IOException
      *             An error occurred reading from the device.
      */
-    public synchronized float[] getTemperatureAndPressure(BMP180SamplingMode mode) throws IOException {
+    public float[] getTemperatureAndPressure(BMP180SamplingMode mode) throws IOException {
         //
         // Temperature
         //
@@ -244,7 +247,9 @@ public class BMP180Device {
     /*
      * Reads the uncalibrated temperature from the device in the given mode.
      */
-    private long getUncalibratedTemperature() throws IOException {
+    private synchronized long getUncalibratedTemperature() throws IOException {
+        checkOpen();
+
         // Write the read temperature command to the command register
         device.write(CONTROL_REGISTER_ADDRESS, READ_TEMPERATURE_COMMAND);
         try {
@@ -266,7 +271,8 @@ public class BMP180Device {
     /*
      * Reads the uncompensated pressure from the device in the given mode.
      */
-    private long getUncompensatedPressure(BMP180SamplingMode mode) throws IOException {
+    private synchronized long getUncompensatedPressure(BMP180SamplingMode mode) throws IOException {
+        checkOpen();
 
         // Write the read pressure command to the command register
         // Combine the hardware over sampling rate request with the read
@@ -299,8 +305,34 @@ public class BMP180Device {
      *             if there was a communications problem with the device.
      */
     public synchronized void softReset() throws IOException {
-        // Write the reset command to the command register. No response expected.
+        checkOpen();
+
+        // Write the reset command to the command register. No response
+        // expected.
         device.write(SOFT_RESET_ADDRESS, SOFT_RESET_COMMAND);
+    }
+
+    /**
+     * Free underlying resources associated with this device and mark it as
+     * closed. Further operations on the device, including further calls to
+     * <code>close()</code>, result in an exception.
+     * 
+     * @throws IOException
+     *             problems occurred communicating with the device.
+     */
+    public synchronized void close() throws IOException {
+        checkOpen();
+        bus.close();
+        bus = null;
+    }
+
+    /*
+     * Check that the device was not closed by the user.
+     */
+    private void checkOpen() throws IOException {
+        if (bus == null) {
+            throw new IOException("BMP180 device has been closed.");
+        }
     }
 
     /**

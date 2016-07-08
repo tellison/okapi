@@ -18,9 +18,11 @@ package com.peir.iot.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,6 +46,11 @@ public class BMP180DeviceTest {
         // Create a device on our mock I2C bus.
         device = new BMP180Device();
         assertNotNull(device);
+    }
+    
+    @After
+    public void tearDown() throws IOException {
+        device.close();
     }
 
     /**
@@ -80,5 +87,21 @@ public class BMP180DeviceTest {
         System.out.printf("Temp=%f, Pressure=%f", values[0], values[1]);
         assertEquals(15.0, values[0], 0.01f);
         assertEquals(699.64, values[1], 0.01f);
+    }
+
+    /**
+     * Check we can close the device.
+     */
+    @Test
+    public void testClose() throws IOException {
+        BMP180Device local = new BMP180Device();
+        local.close();
+
+        try {
+            local.close();
+            fail("Did not throw exception on closing a closed device.");
+        } catch (IOException ex) {
+            // expected
+        }
     }
 }
