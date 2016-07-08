@@ -3,10 +3,7 @@ package com.peir.iot.test;
 import java.io.IOException;
 
 import com.peir.iot.device.BMP180Device;
-import com.pi4j.io.i2c.I2CBus;
-import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
-import com.pi4j.io.i2c.I2CFactoryProvider;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -17,14 +14,20 @@ import junit.framework.TestSuite;
  */
 public class BMP180Test extends TestCase {
 
+    private BMP180Device device;
+
     public BMP180Test(String testName) {
         super(testName);
     }
 
-    protected void setUp() {
+    protected void setUp() throws IOException {
         // Install a factory that produces a mock I2C device for testing in
         // absence of the real device.
         I2CFactory.setFactory(new MockFactory());
+
+        // Create a device on our mock I2C bus.
+        device = new BMP180Device();
+        assertNotNull(device);
     }
 
     /**
@@ -39,8 +42,21 @@ public class BMP180Test extends TestCase {
      * the I2C communications and read the configurationn settings.
      */
     public void testConstructor() throws IOException {
-        BMP180Device device = new BMP180Device();
-        assertNotNull(device);
-        System.out.println(device);
+        BMP180Device bmp180 = new BMP180Device();
+        assertNotNull(bmp180);
+        System.out.println(bmp180);
     }
+
+    public void testGetChipID() throws IOException {
+        assertEquals(BMP180Device.DEVICE_ID, device.getChipID());
+    }
+
+    /**
+     * Check we can reset the device.
+     */
+    public void testSoftReset() throws IOException {
+        // No response expected.
+        device.softReset();
+    }
+
 }

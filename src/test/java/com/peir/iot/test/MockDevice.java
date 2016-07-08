@@ -1,11 +1,10 @@
 package com.peir.iot.test;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.peir.iot.device.BMP180Device;
 import com.pi4j.io.i2c.I2CDevice;
 
 class MockI2CDevice implements I2CDevice {
@@ -49,8 +48,17 @@ class MockI2CDevice implements I2CDevice {
 
     @Override
     public void write(int address, byte[] buffer, int offset, int size) throws IOException {
-        // TODO Auto-generated method stub
+        switch (address) {
+            case SOFT_RESET_ADDRESS:
+                if ((size < 1) || (buffer.length - size < offset) || (buffer[offset] != SOFT_RESET_COMMAND)) {
+                    throw new IOException("Attempt to reset with invalid arguments.");
+                }
+                // Reset does nothing here
+                break;
 
+            default:
+                throw new RuntimeException("Attempt to write to unknown location in mock device.");
+        }
     }
 
     @Override
@@ -80,8 +88,11 @@ class MockI2CDevice implements I2CDevice {
                 int len = Math.min(calib.length, size);
                 System.arraycopy(calib, 0, buffer, offset, len);
                 return len;
+            // Request for device ID - a fixed value
+            case ID_REGISTER_ADDRESS:
+                return BMP180Device.DEVICE_ID;
             default:
-                throw new RuntimeException("Unknown comand sent to mock device");
+                throw new RuntimeException("Attempt to read from unknown location in mock device.");
         }
     }
 
