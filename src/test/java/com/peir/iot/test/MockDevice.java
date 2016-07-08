@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016 Tim Ellison
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.peir.iot.test;
 
 import java.io.ByteArrayOutputStream;
@@ -7,6 +23,15 @@ import java.io.IOException;
 import com.peir.iot.device.BMP180Device;
 import com.pi4j.io.i2c.I2CDevice;
 
+/*
+ * This is a simple emulator for the BMP180 device that can respond to a number
+ * of requests and commands. Used in test suite to test the logic of the wrapper
+ * classes and their APIs in teh absence of a real device, and a mechanism for
+ * forcing some configuration options etc to test the validity of the logic on a
+ * 'known standard' device.
+ * 
+ * The responses are taken from the Bosch BMP180 data sheet.
+ */
 class MockI2CDevice implements I2CDevice {
 
     // Temperature and pressure control register information.
