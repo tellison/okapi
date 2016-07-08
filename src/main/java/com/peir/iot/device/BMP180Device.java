@@ -38,18 +38,17 @@ public class BMP180Device {
     public static final int DEVICE_I2C_ADDRESS = 0x77;
     public static final int DEVICE_ID = 0x55;
 
-    // Temperature and pressure control register information.
+    // Control register information.
     private static final int CALIB_REGISTER_ADDRESS = 0xAA;
     private static final int ID_REGISTER_ADDRESS = 0xD0;
     private static final int SOFT_RESET_ADDRESS = 0xE0;
     private static final int CONTROL_REGISTER_ADDRESS = 0xF4;
-    private static final int READ_PRESSURE_ADDRESS = 0xF6;
-    private static final int READ_TEMPERATURE_ADDRESS = 0xF6;
+    private static final int DATA_REGISTER_ADDRESS = 0xF6;
 
     // Command information.
     private static final byte SOFT_RESET_COMMAND = (byte) 0xB6;
-    private static final byte READ_PRESSURE_COMMAND = (byte) 0x34;
     private static final byte READ_TEMPERATURE_COMMAND = (byte) 0x2E;
+    private static final byte READ_PRESSURE_COMMAND = (byte) 0x34;
 
     // Calibration data information.
     private static final int CALIB_BYTES_LENGTH = 22;
@@ -250,12 +249,13 @@ public class BMP180Device {
         device.write(CONTROL_REGISTER_ADDRESS, READ_TEMPERATURE_COMMAND);
         try {
             // Temperature can always be read at ultra low power speeds.
-            Thread.sleep(BMP180SamplingMode.ULTRA_LOW_POWER.getDelay());
+            Thread.sleep(BMP180SamplingMode.ULTRA_LOW_POWER.getDelayMillis(),
+                    BMP180SamplingMode.ULTRA_LOW_POWER.getDelayNanos());
         } catch (InterruptedException ex) {
         }
 
         byte[] data = new byte[2];
-        int result = device.read(READ_TEMPERATURE_ADDRESS, data, 0, data.length);
+        int result = device.read(DATA_REGISTER_ADDRESS, data, 0, data.length);
         if (result < data.length) {
             throw new IOException("Error reading temperature. Expected 2 bytes but got " + result);
         }
@@ -264,21 +264,23 @@ public class BMP180Device {
     }
 
     /*
-     * Reads the uncompensated pressure from the device in the given mode. TODO:
-     * Where are we sending the required mode?
+     * Reads the uncompensated pressure from the device in the given mode.
      */
     private long getUncompensatedPressure(BMP180SamplingMode mode) throws IOException {
-        // The pressure command is calculated by the enum
+
         // Write the read pressure command to the command register
-        device.write(CONTROL_REGISTER_ADDRESS, READ_PRESSURE_COMMAND);
+        // Combine the hardware over sampling rate request with the read
+        // pressure command.
+        byte combined = (byte) (READ_PRESSURE_COMMAND | ((mode.getOSS() << 6) & 0xFF));
+        device.write(CONTROL_REGISTER_ADDRESS, combined);
         try {
-            Thread.sleep(mode.getDelay());
+            Thread.sleep(mode.getDelayMillis(), mode.getDelayNanos());
         } catch (InterruptedException ex) {
         }
 
         // Read the uncompensated pressure value
         byte[] data = new byte[3];
-        int result = device.read(READ_PRESSURE_ADDRESS, data, 0, data.length);
+        int result = device.read(DATA_REGISTER_ADDRESS, data, 0, data.length);
         if (result < data.length) {
             throw new IOException("Error reading pressure.  Expected 3 bytes but got " + result);
         }
@@ -297,7 +299,7 @@ public class BMP180Device {
      *             if there was a communications problem with the device.
      */
     public synchronized void softReset() throws IOException {
-        // Write the reset command to the command register. No response given.
+        // Write the reset command to the command register. No response expected.
         device.write(SOFT_RESET_ADDRESS, SOFT_RESET_COMMAND);
     }
 

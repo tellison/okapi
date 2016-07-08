@@ -26,32 +26,39 @@ package com.peir.iot.device;
  */
 public enum BMP180SamplingMode {
 
-    /** Single internal sample, 4.5ms (minimum) conversion time. */
-    ULTRA_LOW_POWER(0, 5),
+    /** Single internal sample, 4.5ms (the minimum) conversion time. */
+    ULTRA_LOW_POWER(0, 4, 500000),
 
     /** Two internal samples, 7.5ms conversion time. */
-    STANDARD(1, 8),
+    STANDARD(1, 7, 500000),
 
     /** Four internal samples, 13.5ms conversion time. */
-    HIGH_RESOLUTION(2, 14),
+    HIGH_RESOLUTION(2, 13, 500000),
 
     /** Eight internal samples, 25.5ms conversion time. */
-    ULTRA_HIGH_RESOLUTION(3, 26);
+    ULTRA_HIGH_RESOLUTION(3, 25, 500000);
 
     // Device over sampling setting value.
     private final int oss;
 
-    // Minimum conversion time to allow, in ms, for this mode.
-    private final int delay;
+    // Minimum conversion time to allow for this mode (ms and ns)
+    private final int delayMillis;
+    private final int delayNanos;
 
-    BMP180SamplingMode(int oss, int delay) {
+    BMP180SamplingMode(int oss, int delayMillis, int delayNanos) {
         this.oss = oss;
-        this.delay = delay;
+        this.delayMillis = delayMillis;
+        this.delayNanos = delayNanos;
     }
 
-    /* Returns the conversion delay (in ms) for this over sampling mode. */
-    int getDelay() {
-        return delay;
+    /* Returns the millisecond conversion delay for this over sampling mode. */
+    int getDelayMillis() {
+        return delayMillis;
+    }
+
+    /* Returns the nanosecond conversion delay for this over sampling mode. */
+    int getDelayNanos() {
+        return delayNanos;
     }
 
     /* Returns this over sampling setting value. */
