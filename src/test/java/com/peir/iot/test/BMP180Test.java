@@ -39,12 +39,12 @@ public class BMP180Test extends TestCase {
 
     /**
      * Check we can create a new instance of the device. This will initialize
-     * the I2C communications and read the configurationn settings.
+     * the I2C communications and read the configuration settings.
      */
     public void testConstructor() throws IOException {
         BMP180Device bmp180 = new BMP180Device();
         assertNotNull(bmp180);
-        System.out.println(bmp180);
+        //System.out.println(bmp180);
     }
 
     public void testGetChipID() throws IOException {
@@ -57,6 +57,14 @@ public class BMP180Test extends TestCase {
     public void testSoftReset() throws IOException {
         // No response expected.
         device.softReset();
+    }
+    
+    /**
+     * Check we can get temp and pressure at default settings.
+     */
+    public void testGetTemperatureAndPressure() throws IOException {
+        float[] values = device.getTemperatureAndPressure();
+        System.out.printf("Temp=%f, Pressure=%f", values[0], values[1]);
     }
 
 }

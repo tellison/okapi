@@ -133,6 +133,17 @@ public class BMP180Device {
         return ((data[0] << 8) & 0xFF00) + (data[1] & 0xFF);
     }
 
+    /**
+     * Reads the temperature from the device.
+     * 
+     * The temperature is the true calibrated value, expressed in degrees
+     * Celsius, and provided in steps of 0.1 deg.C.
+     * 
+     * @return the temperature.
+     * 
+     * @throws IOException
+     *             An error occurred reading from the device.
+     */
     public float getTemperature() throws IOException {
 
         long ut = getUncalibratedTemperature();
@@ -145,7 +156,7 @@ public class BMP180Device {
         // Calculate the real temperature
         return (float) ((b5 + 8) >> 4) / 10;
     }
-    
+
     /**
      * Reads temperature and pressure from the device in standard mode.
      * 
@@ -252,8 +263,8 @@ public class BMP180Device {
     }
 
     /*
-     * Reads the uncompensated pressure from the device in the given mode.
-     * TODO: Where are we sending the required mode?
+     * Reads the uncompensated pressure from the device in the given mode. TODO:
+     * Where are we sending the required mode?
      */
     private long getUncompensatedPressure(BMP180SamplingMode mode) throws IOException {
         // The pressure command is calculated by the enum
