@@ -22,8 +22,6 @@ import com.peir.iot.device.BMP180Device;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 
-import junit.framework.TestCase;
-
 /*
  * A mock I2C bus that hosts a mock BMP180 device.
  *
