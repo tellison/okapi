@@ -16,28 +16,27 @@
 
 package com.peir.iot.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import com.peir.iot.device.BMP180Device;
 import com.peir.iot.device.BMP180SamplingMode;
 import com.pi4j.io.i2c.I2CFactory;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 /**
  * Unit tests for the BMP180 device.
  */
-public class BMP180Test extends TestCase {
+public class BMP180DeviceTest {
 
     private BMP180Device device;
 
-    public BMP180Test(String testName) {
-        super(testName);
-    }
-
-    protected void setUp() throws IOException {
+    @Before
+    public void setUp() throws IOException {
         // Install a factory that produces a mock I2C device for testing in
         // absence of the real device.
         I2CFactory.setFactory(new MockFactory());
@@ -48,22 +47,17 @@ public class BMP180Test extends TestCase {
     }
 
     /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(BMP180Test.class);
-    }
-
-    /**
      * Check we can create a new instance of the device. This will initialize
      * the I2C communications and read the configuration settings.
      */
+    @Test
     public void testConstructor() throws IOException {
         BMP180Device bmp180 = new BMP180Device();
         assertNotNull(bmp180);
         // System.out.println(bmp180);
     }
 
+    @Test
     public void testGetChipID() throws IOException {
         assertEquals(BMP180Device.DEVICE_ID, device.getChipID());
     }
@@ -71,6 +65,7 @@ public class BMP180Test extends TestCase {
     /**
      * Check we can reset the device.
      */
+    @Test
     public void testSoftReset() throws IOException {
         // No response expected.
         device.softReset();
@@ -79,11 +74,11 @@ public class BMP180Test extends TestCase {
     /**
      * Check we can get temp and pressure at default settings.
      */
+    @Test
     public void testGetTemperatureAndPressure() throws IOException {
         float[] values = device.getTemperatureAndPressure(BMP180SamplingMode.ULTRA_LOW_POWER);
         System.out.printf("Temp=%f, Pressure=%f", values[0], values[1]);
         assertEquals(15.0, values[0], 0.01f);
         assertEquals(699.64, values[1], 0.01f);
     }
-
 }
