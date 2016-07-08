@@ -86,9 +86,6 @@ public class BMP180Device {
      * @throws IOException An exception occurred reading data from the device.
      */
     private void readCalibrationData() throws IOException {
-        assert (EEPROM_START < +CALIB_REGISTER_ADDRESS);
-        assert (CALIB_REGISTER_ADDRESS <= EEPROM_END - CALIB_BYTES_LENGTH);
-
         // Read all of the calibration data into a byte array.
         byte[] calibData = new byte[CALIB_BYTES_LENGTH];
         int result = device.read(CALIB_REGISTER_ADDRESS, calibData, 0, CALIB_BYTES_LENGTH);
@@ -280,5 +277,31 @@ public class BMP180Device {
     public synchronized void softReset() throws IOException {
         // Write the reset command to the command register. No response given.
         device.write(SOFT_RESET_ADDRESS, SOFT_RESET_COMMAND);
+    }
+
+    /**
+     * Returns a String representation of this object.
+     * 
+     * The string shows the current status of the calibration data.
+     * 
+     * @return a debug string showing information for this device.
+     */
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(this.getClass().getSimpleName());
+        buffer.append("(\n\t");
+        buffer.append("AC1=").append(ac1).append("\n\t");
+        buffer.append("AC2=").append(ac2).append("\n\t");
+        buffer.append("AC3=").append(ac3).append("\n\t");
+        buffer.append("AC4=").append(ac4).append("\n\t");
+        buffer.append("AC5=").append(ac5).append("\n\t");
+        buffer.append("AC6=").append(ac6).append("\n\t");
+        buffer.append("B1=").append(b1).append("\n\t");
+        buffer.append("B2=").append(b2).append("\n\t");
+        buffer.append("MB=").append(mb).append("\n\t");
+        buffer.append("MC=").append(mc).append("\n\t");
+        buffer.append("MD=").append(md);
+        buffer.append(")");
+        return buffer.toString();
     }
 }
