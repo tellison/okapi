@@ -38,10 +38,6 @@ public class BMP180Device {
     public static final int DEVICE_I2C_ADDRESS = 0x77;
     public static final int DEVICE_ID = 0x55;
 
-    // EEPROM range.
-    private static final int EEPROM_START = 0xAA;
-    private static final int EEPROM_END = 0xBF;
-
     // Temperature and pressure control register information.
     private static final int CALIB_REGISTER_ADDRESS = 0xAA;
     private static final int ID_REGISTER_ADDRESS = 0xD0;
