@@ -137,6 +137,8 @@ class MockI2CDevice implements I2CDevice {
                 return 2;
 
             // Request for a temperature/ pressure reading
+            // Answer values for the worked example in the data sheet so we cand
+            // check the answer
             case READ_DATA_ADDRESS:
                 logger.log("Received a read data request");
 
@@ -169,10 +171,10 @@ class MockI2CDevice implements I2CDevice {
                             Thread.sleep(4, 500000);
                         } catch (InterruptedException ex) {
                         }
-                        // Answer 23843
-                        buffer[offset] = (byte) 0x00;
-                        buffer[offset + 1] = (byte) 0x5D;
-                        buffer[offset + 2] = (byte) 0x23;
+                        // Answer 6103808 (23843 << 8)
+                        buffer[offset] = (byte) 0x5D;
+                        buffer[offset + 1] = (byte) 0x23;
+                        buffer[offset + 2] = (byte) 0x00;
                         return 3;
                 }
 
