@@ -70,6 +70,7 @@ public class BMP180Device {
      */
     public BMP180Device() throws IOException {
         super();
+        // TODO: should this bus be closed when the device is discarded?
         I2CBus bus = I2CFactory.getInstance(I2CBus.BUS_1);
         device = bus.getDevice(DEVICE_I2C_ADDRESS);
         readCalibrationData();
