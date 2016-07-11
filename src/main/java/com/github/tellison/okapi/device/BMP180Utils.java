@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.peir.iot.device;
+package com.github.tellison.okapi.device;
 
 public class BMP180Utils {
 

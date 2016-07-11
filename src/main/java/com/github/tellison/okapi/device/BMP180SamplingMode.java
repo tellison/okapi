@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.peir.iot.device;
+package com.github.tellison.okapi.device;
 
 /**
  * The set of modes available for sampling data from the BMP180 device.

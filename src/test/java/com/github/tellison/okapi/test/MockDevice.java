@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.peir.iot.test;
+package com.github.tellison.okapi.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import com.peir.iot.device.BMP180Device;
+import com.github.tellison.okapi.device.BMP180Device;
 import com.pi4j.io.i2c.I2CDevice;
 
 /*

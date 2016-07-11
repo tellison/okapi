@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.peir.iot.test;
+package com.github.tellison.okapi.test;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.peir.iot.device.BMP180Utils;
+import com.github.tellison.okapi.device.BMP180Utils;
 
 public class BMP180UtilsTest {
 

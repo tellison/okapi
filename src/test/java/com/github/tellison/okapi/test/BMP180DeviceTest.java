@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.peir.iot.test;
+package com.github.tellison.okapi.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -26,8 +26,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.peir.iot.device.BMP180Device;
-import com.peir.iot.device.BMP180SamplingMode;
+import com.github.tellison.okapi.device.BMP180Device;
+import com.github.tellison.okapi.device.BMP180SamplingMode;
 import com.pi4j.io.i2c.I2CFactory;
 
 /**

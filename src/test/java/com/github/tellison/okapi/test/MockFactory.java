@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.peir.iot.test;
+package com.github.tellison.okapi.test;
 
 import java.io.IOException;
 

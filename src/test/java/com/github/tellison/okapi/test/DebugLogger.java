@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.peir.iot.test;
+package com.github.tellison.okapi.test;
 
 /*
  * A very simple logger for the mock BMP180 device, so we can see what is happening.
