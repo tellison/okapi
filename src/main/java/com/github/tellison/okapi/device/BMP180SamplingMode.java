@@ -17,7 +17,7 @@
 package com.github.tellison.okapi.device;
 
 /**
- * The set of modes available for sampling data from the BMP180 device.
+ * Sampling modes for the BMP180 device.
  * 
  * The temperature value is always sampled at a rate of 4.5ms. The pressure
  * value can be over sampled by specifying one of the given modes defined by

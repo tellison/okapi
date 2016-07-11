@@ -35,8 +35,15 @@ import com.pi4j.io.i2c.I2CFactory;
  */
 public class BMP180Device implements Closeable {
 
-    // Device information.
+    /**
+     * The I2C bus address of this device, a constant <code>0x77</code>.
+     */
     public static final int DEVICE_I2C_ADDRESS = 0x77;
+
+    /**
+     * The hardware device ID for devices of this type, a constant
+     * <code>0x55</code>.
+     */
     public static final int DEVICE_ID = 0x55;
 
     // Control register information.
@@ -67,7 +74,13 @@ public class BMP180Device implements Closeable {
      * Constructs a new representation of the device, and reads it's calibration
      * information.
      * 
+     * Every device has individual calibration coefficients used to configure
+     * the device at time of manufacturing. Creating a new instance of the
+     * device reads these and uses them to calculate the temperature and
+     * pressure readings in standard units.
+     * 
      * @throws IOException
+     *             A problem occurred communicating with the device.
      */
     public BMP180Device() throws IOException {
         super();
@@ -120,9 +133,10 @@ public class BMP180Device implements Closeable {
      * The chip ID is always 0x55. This method can be used to ensure the device
      * is communicating correctly.
      * 
+     * @return The device ID (0x55)
+     * 
      * @throws IOException
-     *             if there is an error communicating with the device.
-     * @returns the device ID (0x55)
+     *             A problem occurred communicating with the device.
      */
     public synchronized int getChipID() throws IOException {
         checkOpen();
@@ -142,10 +156,10 @@ public class BMP180Device implements Closeable {
      * The temperature is the true calibrated value, expressed in degrees
      * Celsius, and provided in steps of 0.1 deg.C.
      * 
-     * @return the temperature.
+     * @return The temperature in deg.C.
      * 
      * @throws IOException
-     *             An error occurred reading from the device.
+     *             A problem occurred communicating with the device.
      */
     public float getTemperature() throws IOException {
 
@@ -161,7 +175,8 @@ public class BMP180Device implements Closeable {
     }
 
     /**
-     * Reads temperature and pressure from the device in standard mode.
+     * Reads the temperature and pressure from the device in standard sampling
+     * mode.
      * 
      * The temperature is the true calibrated value, expressed in degrees
      * Celsius, and provided in steps of 0.1 deg.C. The pressure is the true
@@ -173,14 +188,14 @@ public class BMP180Device implements Closeable {
      *         pressure.
      * 
      * @throws IOException
-     *             An error occurred reading from the device.
+     *             A problem occurred communicating with the device.
      */
     public float[] getTemperatureAndPressure() throws IOException {
         return getTemperatureAndPressure(BMP180SamplingMode.STANDARD);
     }
 
     /**
-     * Reads temperature and pressure from the device in the given mode.
+     * Reads the temperature and pressure from the device in the given mode.
      * 
      * The temperature is the true calibrated value, expressed in degrees
      * Celsius, and provided in steps of 0.1 deg.C. The pressure is the true
@@ -195,7 +210,7 @@ public class BMP180Device implements Closeable {
      *         pressure.
      * 
      * @throws IOException
-     *             An error occurred reading from the device.
+     *             A problem occurred communicating with the device.
      */
     public float[] getTemperatureAndPressure(BMP180SamplingMode mode) throws IOException {
         //
@@ -302,7 +317,7 @@ public class BMP180Device implements Closeable {
      * The device will conduct the same sequence as a power-on reset.
      * 
      * @throws IOException
-     *             if there was a communications problem with the device.
+     *             A problem occurred communicating with the device.
      */
     public synchronized void softReset() throws IOException {
         checkOpen();
@@ -318,7 +333,7 @@ public class BMP180Device implements Closeable {
      * <code>close()</code>, result in an exception.
      * 
      * @throws IOException
-     *             problems occurred communicating with the device.
+     *             A problem occurred communicating with the device.
      */
     public synchronized void close() throws IOException {
         checkOpen();
@@ -336,11 +351,11 @@ public class BMP180Device implements Closeable {
     }
 
     /**
-     * Returns a String representation of this object.
+     * Returns a readable representation of this object.
      * 
-     * The string shows the current status of the calibration data.
+     * The returned string shows the current status of the calibration data.
      * 
-     * @return a debug string showing information for this device.
+     * @return A debug string showing information for this device.
      */
     @Override
     public String toString() {

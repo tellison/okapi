@@ -23,7 +23,7 @@ public class BMP180Utils {
      * 
      * @param degC
      *            the temperature in degrees Celsius.
-     * @return the same temperate expressed in degrees Fahrenheit.
+     * @return The same temperate expressed in degrees Fahrenheit.
      */
     public static float celsiusToFahrenheit(float degC) {
         return (float) ((1.8 * degC) + 32.0);
@@ -44,7 +44,7 @@ public class BMP180Utils {
      *            pressure at altitude, in hPa
      * @param measuredTemperture
      *            temperature at the measured point, in deg. C.
-     * @return altitude above sea level, in metres
+     * @return The altitude above sea level, in metres.
      */
     public static float absoluteAltitude(float seaLevelPressure, float measuredPressure, float measuredTemperture) {
         double term = Math.pow(seaLevelPressure / measuredPressure, (1d / 5.257)) - 1d;
@@ -66,8 +66,8 @@ public class BMP180Utils {
      * @param measuredPressure
      *            pressure at altitude, in hPa
      * @param measuredTemperature
-     *            temperature at altitude, in de. C.
-     * @return air pressure at sea level, in hPa
+     *            temperature at altitude, in deg. C.
+     * @return Air pressure at sea level, in hectopascals (hPa)
      */
     public static float seaLevelPressure(float heightASL, float measuredPressure, float measuredTemperature) {
         double heightFactor = 0.0065d * heightASL;
