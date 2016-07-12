@@ -119,9 +119,9 @@ public class BMP180Device implements Closeable {
 
             // No value should be 0 or 0xFFFF if communications working.
             if (ac1 == 0 || ac2 == 0 || ac3 == 0 || ac4 == 0 || ac5 == 0 || ac6 == 0 || b1 == 0 || b2 == 0 || mb == 0
-                    || mc == 0 || md == 0 || ac1 == 0xFFFF || ac2 == 0xFFFF || ac3 == 0xFFFF || ac4 == 0xFFFF
-                    || ac5 == 0xFFFF || ac6 == 0xFFFF || b1 == 0xFFFF || b2 == 0xFFFF || mb == 0xFFFF || mc == 0xFFFF
-                    || md == 0xFFFF) {
+                    || mc == 0 || md == 0 || ac1 == (short) 0xFFFF || ac2 == (short) 0xFFFF || ac3 == (short) 0xFFFF
+                    || ac4 == 0xFFFF || ac5 == 0xFFFF || ac6 == 0xFFFF || b1 == (short) 0xFFFF || b2 == (short) 0xFFFF
+                    || mb == (short) 0xFFFF || mc == (short) 0xFFFF || md == (short) 0xFFFF) {
                 throw new IOException("Error reading valid calibration data from device.");
             }
         }
@@ -175,6 +175,29 @@ public class BMP180Device implements Closeable {
     }
 
     /**
+     * Reads the pressure from the device.
+     * 
+     * The pressure is the true calibrated and temperature compensated value,
+     * expressed in hPa, and provided in steps of 0.01hPa (0.01mbar).
+     * <p>
+     * <strong>Implementation note:</strong> This method is included for
+     * completeness. Calculating the actual pressure depends upon the
+     * temperature, so this method will acquire both temperature and pressure
+     * and is equivalent to calling
+     * <code>getTemperatureAndPressure(mode)[1]</code>.
+     * 
+     * @param mode
+     *            the sampling mode requested for the device pressure reading.
+     * @return The pressure in hPa.
+     * 
+     * @throws IOException
+     *             A problem occurred communicating with the device.
+     */
+    public float getPressure(BMP180SamplingMode mode) throws IOException {
+        return getTemperatureAndPressure(mode)[1];
+    }
+
+    /**
      * Reads the temperature and pressure from the device in standard sampling
      * mode.
      * 
@@ -183,7 +206,7 @@ public class BMP180Device implements Closeable {
      * calibrated and temperature compensated value, expressed in hPa, and
      * provided in steps of 0.01hPa (0.01mbar).
      * 
-     * @return the temperature and pressure values in a two element array of
+     * @return The temperature and pressure values in a two element array of
      *         floats, where array[0] is the temperature and array[1] is the
      *         pressure.
      * 
@@ -203,9 +226,9 @@ public class BMP180Device implements Closeable {
      * provided in steps of 0.01hPa (0.01mbar).
      * 
      * @param mode
-     *            the sampling mode requested for the device readings.
+     *            the sampling mode requested for the device pressure reading.
      * 
-     * @return the temperature and pressure values in a two element array of
+     * @return The temperature and pressure values in a two element array of
      *         floats, where array[0] is the temperature and array[1] is the
      *         pressure.
      * 
