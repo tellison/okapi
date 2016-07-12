@@ -18,6 +18,7 @@ package com.github.tellison.okapi.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -36,18 +37,26 @@ import com.pi4j.io.i2c.I2CFactory;
 public class BMP180DeviceTest {
 
     private BMP180Device device;
+    private boolean usingRealDevice;
 
     @Before
     public void setUp() throws IOException {
+        // To test the logic we use a mock device for the tests.
+        // To run a less rigorous set of tests on the real device
+        // specify -DuseRealDevice on the command-line
+        usingRealDevice = System.getProperty("useRealDevice") != null;
+
         // Install a factory that produces a mock I2C device for testing in
         // absence of the real device.
-        I2CFactory.setFactory(new MockFactory());
+        if (!usingRealDevice) {
+            I2CFactory.setFactory(new MockFactory());
+        }
 
         // Create a device on our mock I2C bus.
         device = new BMP180Device();
         assertNotNull(device);
     }
-    
+
     @After
     public void tearDown() throws IOException {
         device.close();
@@ -61,9 +70,13 @@ public class BMP180DeviceTest {
     public void testConstructor() throws IOException {
         BMP180Device bmp180 = new BMP180Device();
         assertNotNull(bmp180);
-        // System.out.println(bmp180);
     }
 
+    /**
+     * Should return known const ID.
+     * 
+     * @throws IOException
+     */
     @Test
     public void testGetChipID() throws IOException {
         assertEquals(BMP180Device.DEVICE_ID, device.getChipID());
@@ -84,9 +97,39 @@ public class BMP180DeviceTest {
     @Test
     public void testGetTemperatureAndPressure() throws IOException {
         float[] values = device.getTemperatureAndPressure(BMP180SamplingMode.ULTRA_LOW_POWER);
-        System.out.printf("Temp=%f, Pressure=%f", values[0], values[1]);
-        assertEquals(15.0, values[0], 0.01f);
-        assertEquals(699.64, values[1], 0.01f);
+        checkValues(values[0], values[1]);
+    }
+
+    /**
+     * Check we can get temp and pressure at various sampling settings.
+     */
+    @Test
+    public void testGetTemperatureAndPressureSampling() throws IOException {
+        for (BMP180SamplingMode mode : BMP180SamplingMode.values()) {
+            float[] values = device.getTemperatureAndPressure(mode);
+            checkValues(values[0], values[1]);
+        }
+    }
+
+    /* Check the given values match our expectations. */
+    private void checkValues(float temperature, float pressure) {
+        System.out.printf("Temp=%f, Pressure=%f", temperature, pressure);
+        if (usingRealDevice) {
+            // The real device gives actual values. We don't know what they are.
+            // Assume we are in reasonable earthy temperatures
+            assertTrue(Float.isFinite(temperature));
+            assertTrue(temperature > -10.0);
+            assertTrue(temperature < 40.0);
+            // Assume we are in the device's specific valid range (+9000m to
+            // -500m relating to sea level)
+            assertTrue(Float.isFinite(pressure));
+            assertTrue(temperature > 300.0);
+            assertTrue(temperature < 1100.0);
+        } else {
+            // The mock device always gives data sheet example results.
+            assertEquals(15.0, temperature, 0.1f);
+            assertEquals(699.64, pressure, 0.1f);
+        }
     }
 
     /**
@@ -99,7 +142,7 @@ public class BMP180DeviceTest {
 
         try {
             local.close();
-            fail("Did not throw exception on closing a closed device.");
+            fail("Should throw exception on closing a closed device.");
         } catch (IOException ex) {
             // expected
         }

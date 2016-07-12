@@ -91,7 +91,8 @@ class MockI2CDevice implements I2CDevice {
                     throw new IOException("Attempt to send control with invalid arguments.");
                 }
                 int control = buffer[offset];
-                switch (control) {
+                // Ignore the sampling mode requested
+                switch (control & 0b00111111) {
                     case READ_TEMPERATURE_COMMAND:
                         logger.log("Received read temperature command");
                         state = DeviceStates.READING_TEMP;
