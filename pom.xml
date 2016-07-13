@@ -46,7 +46,7 @@
 
     <scm>
         <connection>scm:git:git://github.com/tellison/okapi.git</connection>
-        <developerConnection>scm:git:git@github.com/tellison/okapi.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:tellison/okapi.git</developerConnection>
         <url>http://github.com/tellison/okapi/tree/master</url>
       <tag>okapi-0.1.0</tag>
   </scm>
