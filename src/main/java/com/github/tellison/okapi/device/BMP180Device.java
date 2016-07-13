@@ -141,13 +141,13 @@ public class BMP180Device implements Closeable {
     public synchronized int getChipID() throws IOException {
         checkOpen();
 
-        byte[] data = new byte[2];
+        byte[] data = new byte[1];
         int result = device.read(ID_REGISTER_ADDRESS, data, 0, data.length);
         if (result < data.length) {
-            throw new IOException("Error reading device id. Expected 2 bytes but got " + result);
+            throw new IOException("Error reading device id. Expected 1 byte but got " + result);
         }
         // Extract the device id
-        return ((data[0] << 8) & 0xFF00) + (data[1] & 0xFF);
+        return (data[0] & 0xFF);
     }
 
     /**
@@ -358,6 +358,7 @@ public class BMP180Device implements Closeable {
      * @throws IOException
      *             A problem occurred communicating with the device.
      */
+    @Override
     public synchronized void close() throws IOException {
         checkOpen();
         bus.close();

@@ -158,9 +158,8 @@ class MockI2CDevice implements I2CDevice {
             // Request for device ID - a fixed value
             case ID_REGISTER_ADDRESS:
                 logger.log("Returning device ID = " + BMP180Device.DEVICE_ID);
-                buffer[offset] = 0;
-                buffer[offset + 1] = BMP180Device.DEVICE_ID;
-                return 2;
+                buffer[offset] = BMP180Device.DEVICE_ID;
+                return 1;
 
             // Request for a temperature/ pressure reading
             // Answer values for the worked example in the data sheet so we cand
