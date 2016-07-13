@@ -113,18 +113,18 @@ public class BMP180DeviceTest {
 
     /* Check the given values match our expectations. */
     private void checkValues(float temperature, float pressure) {
-        System.out.printf("Temp=%f, Pressure=%f", temperature, pressure);
+        System.out.printf("Temp=%f, Pressure=%f\n", temperature, pressure);
         if (usingRealDevice) {
             // The real device gives actual values. We don't know what they are.
             // Assume we are in reasonable earthy temperatures
             assertTrue(Float.isFinite(temperature));
-            assertTrue(temperature > -10.0);
-            assertTrue(temperature < 40.0);
+            assertTrue("Temperature too low", temperature > -10.0);
+            assertTrue("Temperature too high", temperature < 40.0);
             // Assume we are in the device's specific valid range (+9000m to
             // -500m relating to sea level)
             assertTrue(Float.isFinite(pressure));
-            assertTrue(temperature > 300.0);
-            assertTrue(temperature < 1100.0);
+            assertTrue("Pressure too low", pressure > 300.0);
+            assertTrue("Pressure too high", pressure < 1100.0);
         } else {
             // The mock device always gives data sheet example results.
             assertEquals(15.0, temperature, 0.1f);
@@ -137,14 +137,38 @@ public class BMP180DeviceTest {
      */
     @Test
     public void testClose() throws IOException {
-        BMP180Device local = new BMP180Device();
-        local.close();
-
+        tearDown();
         try {
-            local.close();
-            fail("Should throw exception on closing a closed device.");
-        } catch (IOException ex) {
-            // expected
+            // The real device requires some time to reset.
+            if (usingRealDevice) {
+                Thread.sleep(1000);
+            }
+        } catch (InterruptedException e) {
         }
+        try {
+            BMP180Device local = new BMP180Device();
+            local.close();
+
+            try {
+                local.close();
+                fail("Should throw exception on closing a closed device.");
+            } catch (IOException ex) {
+                // expected
+            }
+        } finally {
+            setUp();
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        BMP180DeviceTest me = new BMP180DeviceTest();
+        me.setUp();
+        me.testConstructor();
+        me.testGetChipID();
+        me.testGetTemperatureAndPressure();
+        me.testGetTemperatureAndPressureSampling();
+        me.testSoftReset();
+        me.testClose();
+        me.tearDown();
     }
 }
