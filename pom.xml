@@ -20,7 +20,7 @@
 
     <groupId>com.github.tellison</groupId>
     <artifactId>okapi</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
     <packaging>jar</packaging>
 
 
@@ -48,7 +48,7 @@
         <connection>scm:git:git://github.com/tellison/okapi.git</connection>
         <developerConnection>scm:git:git@github.com:tellison/okapi.git</developerConnection>
         <url>http://github.com/tellison/okapi/tree/master</url>
-    <tag>HEAD</tag>
+    <tag>okapi-0.1.1</tag>
   </scm>
 
     <properties>
