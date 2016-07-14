@@ -30,5 +30,5 @@ Any problems please raise a [Git issue] (https://github.com/tellison/okapi/issue
 
 ## Release Notes
 
-0.1.1 - Bug fix on retrieving device id.
-0.1.0 - Initial version.
+ - 0.1.1 - Bug fix on retrieving device id.
+ - 0.1.0 - Initial version.
