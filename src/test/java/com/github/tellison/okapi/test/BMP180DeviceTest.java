@@ -96,7 +96,7 @@ public class BMP180DeviceTest {
      */
     @Test
     public void testGetTemperatureAndPressure() throws IOException {
-        float[] values = device.getTemperatureAndPressure(BMP180SamplingMode.ULTRA_LOW_POWER);
+        float[] values = device.getTemperatureAndPressure();
         checkValues(values[0], values[1]);
     }
 
