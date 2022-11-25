@@ -1,13 +1,10 @@
 # A Java API to the Bosch BMP180 Digital pressure sensor.
 
-This project provides a Java API to the Bosch BMP180 Digital pressure sensor.  The sensor is available
-on an inter-integrated circuit (I2C) bus.
+This project provides a Java API to the Bosch BMP180 Digital pressure sensor.  The sensor is available on an inter-integrated circuit (I2C) bus.
 
-Key information about control of the device is found in the [device data sheet]
-(http://www.datasheetspdf.com/PDF/BMP180/770150/1), which was the source for much of this material.
+Key information about control of the device is found in the [device data sheet](http://www.datasheetspdf.com/PDF/BMP180/770150/1), which was the source for much of this material.
 
-The project comes with tests that run on an included emulator class, and utilities for operations
-typically undertaken with the results from this device.
+The project comes with tests that run on an included emulator class, and utilities for operations typically undertaken with the results from this device.
 
 ## Example Usage
 
