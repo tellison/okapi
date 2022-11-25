@@ -22,7 +22,7 @@ The simple use of this code is as follows:
 
 ## Problems and Issues
 
-Any problems please raise a [Git issue] (https://github.com/tellison/okapi/issues).
+Any problems please raise a [Git issue](https://github.com/tellison/okapi/issues).
 
 
 ## Release Notes
