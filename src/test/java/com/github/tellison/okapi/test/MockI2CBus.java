@@ -36,13 +36,8 @@ class MockI2CBus implements I2CBus {
     }
 
     @Override
-    public String getFileName() {
-        return "Undefined file name";
-    }
-
-    @Override
-    public int getFileDescriptor() {
-        return -1;
+    public int getBusNumber() {
+        return I2CBus.BUS_1;
     }
 
     @Override

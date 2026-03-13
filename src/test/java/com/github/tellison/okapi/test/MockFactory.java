@@ -21,16 +21,16 @@ import java.io.IOException;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactoryProvider;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * An I2C factory that returns a mock device bus.
  *
  */
-class MockFactory extends TestCase implements I2CFactoryProvider {
+class MockFactory implements I2CFactoryProvider {
 
     @Override
-    public I2CBus getBus(int busNumber) throws IOException {
+    public I2CBus getBus(int busNumber, long lockAquireTimeout, java.util.concurrent.TimeUnit lockAquireTimeoutUnit) throws com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException, IOException {
         assertEquals(I2CBus.BUS_1, busNumber);
         return new MockI2CBus();
     }

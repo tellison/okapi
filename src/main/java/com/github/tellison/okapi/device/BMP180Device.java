@@ -24,6 +24,7 @@ import java.io.IOException;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
+import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 /**
  * A BMP180 device connected via I2C.
@@ -84,7 +85,11 @@ public class BMP180Device implements Closeable {
      */
     public BMP180Device() throws IOException {
         super();
-        bus = I2CFactory.getInstance(I2CBus.BUS_1);
+        try {
+            bus = I2CFactory.getInstance(I2CBus.BUS_1);
+        } catch (UnsupportedBusNumberException e) {
+            throw new IOException("Unsupported I2C bus: " + I2CBus.BUS_1, e);
+        }
         device = bus.getDevice(DEVICE_I2C_ADDRESS);
         readCalibrationData();
     }
@@ -256,7 +261,7 @@ public class BMP180Device implements Closeable {
 
         // Calculate the true pressure (see device data sheet)
         long b6 = b5 - 4000;
-        long p1 = (b2 * (b6 * b6) >> 12) >> 11;
+        long p1 = (b2 * ((b6 * b6) >> 12)) >> 11;
         long p2 = ac2 * b6 >> 11;
         long p3 = p1 + p2;
         long b3 = (((ac1 * 4 + p3) << mode.getOSS()) + 2) / 4;
@@ -266,7 +271,7 @@ public class BMP180Device implements Closeable {
         long b4 = (ac4 * (p3 + 32768)) >> 15;
         long b7 = (up - b3) * (50000 >> mode.getOSS());
 
-        long pa = (b7 < 0x80000000) ? (b7 * 2) / b4 : (b7 / b4) * 2;
+        long pa = (b7 < 0x80000000L) ? (b7 * 2) / b4 : (b7 / b4) * 2;
         p1 = (pa >> 8) * (pa >> 8);
         p1 = (p1 * 3038) >> 16;
         p2 = (-7357 * pa) >> 16;

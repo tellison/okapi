@@ -16,16 +16,17 @@
 
 package com.github.tellison.okapi.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.github.tellison.okapi.device.BMP180Device;
 import com.github.tellison.okapi.device.BMP180SamplingMode;
@@ -39,7 +40,7 @@ public class BMP180DeviceTest {
     private BMP180Device device;
     private boolean usingRealDevice;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         // To test the logic we use a mock device for the tests.
         // To run a less rigorous set of tests on the real device
@@ -53,11 +54,12 @@ public class BMP180DeviceTest {
         }
 
         // Create a device on our mock I2C bus.
+        MockI2CDevice.resetSimulations();
         device = new BMP180Device();
         assertNotNull(device);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         device.close();
     }
@@ -118,13 +120,13 @@ public class BMP180DeviceTest {
             // The real device gives actual values. We don't know what they are.
             // Assume we are in reasonable earthy temperatures
             assertTrue(Float.isFinite(temperature));
-            assertTrue("Temperature too low", temperature > -10.0);
-            assertTrue("Temperature too high", temperature < 40.0);
+            assertTrue(temperature > -10.0, "Temperature too low");
+            assertTrue(temperature < 40.0, "Temperature too high");
             // Assume we are in the device's specific valid range (+9000m to
             // -500m relating to sea level)
             assertTrue(Float.isFinite(pressure));
-            assertTrue("Pressure too low", pressure > 300.0);
-            assertTrue("Pressure too high", pressure < 1100.0);
+            assertTrue(pressure > 300.0, "Pressure too low");
+            assertTrue(pressure < 1100.0, "Pressure too high");
         } else {
             // The mock device always gives data sheet example results.
             assertEquals(15.0, temperature, 0.1f);
@@ -149,15 +151,57 @@ public class BMP180DeviceTest {
             BMP180Device local = new BMP180Device();
             local.close();
 
-            try {
-                local.close();
-                fail("Should throw exception on closing a closed device.");
-            } catch (IOException ex) {
-                // expected
-            }
+            assertThrows(IOException.class, () -> local.close(), "Should throw exception on closing a closed device.");
+            assertThrows(IOException.class, () -> local.getChipID(), "Should throw exception on interacting with a closed device.");
+            assertThrows(IOException.class, () -> local.getTemperature(), "Should throw exception on interacting with a closed device.");
+            assertThrows(IOException.class, () -> local.softReset(), "Should throw exception on interacting with a closed device.");
+
         } finally {
             setUp();
         }
+    }
+
+    /**
+     * Negative tests validating error handling.
+     */
+    @Test
+    public void testShortCalibrationRead() throws IOException {
+        if (usingRealDevice) return;
+        MockI2CDevice.simulateShortCalibRead = true;
+        IOException exception = assertThrows(IOException.class, () -> new BMP180Device());
+        assertTrue(exception.getMessage().contains("Only read "));
+    }
+
+    @Test
+    public void testBadCalibrationData() throws IOException {
+        if (usingRealDevice) return;
+        MockI2CDevice.simulateBadCalibData = true;
+        IOException exception = assertThrows(IOException.class, () -> new BMP180Device());
+        assertTrue(exception.getMessage().contains("Error reading valid calibration data"));
+    }
+
+    @Test
+    public void testShortDeviceIDRead() throws IOException {
+        if (usingRealDevice) return;
+        MockI2CDevice.simulateShortIdRead = true;
+        IOException exception = assertThrows(IOException.class, () -> device.getChipID());
+        assertTrue(exception.getMessage().contains("Error reading device id. Expected 1 byte"));
+    }
+
+    @Test
+    public void testShortTemperatureRead() throws IOException {
+        if (usingRealDevice) return;
+        MockI2CDevice.simulateShortTempRead = true;
+        IOException exception = assertThrows(IOException.class, () -> device.getTemperature());
+        assertTrue(exception.getMessage().contains("Error reading temperature. Expected 2 bytes"));
+    }
+
+    @Test
+    public void testShortPressureRead() throws IOException {
+        if (usingRealDevice) return;
+        MockI2CDevice.simulateShortPressureRead = true;
+        IOException exception = assertThrows(IOException.class, () -> device.getPressure(BMP180SamplingMode.STANDARD));
+        assertTrue(exception.getMessage().contains("Error reading pressure.  Expected 3 bytes"));
     }
 
     public static void main(String[] args) throws IOException {

@@ -42,13 +42,13 @@ public class BMP180Utils {
      *            pressure at mean sea level, in hPa
      * @param measuredPressure
      *            pressure at altitude, in hPa
-     * @param measuredTemperture
+     * @param measuredTemperature
      *            temperature at the measured point, in deg. C.
      * @return The altitude above sea level, in metres.
      */
-    public static float absoluteAltitude(float seaLevelPressure, float measuredPressure, float measuredTemperture) {
+    public static float absoluteAltitude(float seaLevelPressure, float measuredPressure, float measuredTemperature) {
         double term = Math.pow(seaLevelPressure / measuredPressure, (1d / 5.257)) - 1d;
-        double numerator = term * (measuredTemperture + 273.15);
+        double numerator = term * (measuredTemperature + 273.15);
         return (float) (numerator / 0.0065);
     }
 

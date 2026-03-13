@@ -23,6 +23,9 @@ import java.io.IOException;
 import com.github.tellison.okapi.device.BMP180Device;
 import com.pi4j.io.i2c.I2CDevice;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+
 /*
  * This is a simple emulator for the BMP180 device that can respond to a number
  * of requests and commands. Used in test suite to test the logic of the wrapper
@@ -57,9 +60,29 @@ class MockI2CDevice implements I2CDevice {
     // A simple output to show mock device internals.
     DebugLogger logger = new DebugLogger();
 
+    // Simulation flags for negative testing
+    public static boolean simulateShortCalibRead = false;
+    public static boolean simulateBadCalibData = false;
+    public static boolean simulateShortIdRead = false;
+    public static boolean simulateShortTempRead = false;
+    public static boolean simulateShortPressureRead = false;
+
+    public static void resetSimulations() {
+        simulateShortCalibRead = false;
+        simulateBadCalibData = false;
+        simulateShortIdRead = false;
+        simulateShortTempRead = false;
+        simulateShortPressureRead = false;
+    }
+
     @Override
     public void write(byte b) throws IOException {
         write(new byte[] { b }, 0, 1);
+    }
+
+    @Override
+    public void write(byte[] buffer) throws IOException {
+        write(buffer, 0, buffer.length);
     }
 
     @Override
@@ -71,6 +94,11 @@ class MockI2CDevice implements I2CDevice {
     @Override
     public void write(int address, byte b) throws IOException {
         write(address, new byte[] { b }, 0, 1);
+    }
+
+    @Override
+    public void write(int address, byte[] buffer) throws IOException {
+        write(address, buffer, 0, buffer.length);
     }
 
     @Override
@@ -150,13 +178,19 @@ class MockI2CDevice implements I2CDevice {
         switch (address) {
             // Request for calibration data response
             case CALIB_REGISTER_ADDRESS:
-                byte[] calib = getCalibData();
+                byte[] calib = simulateBadCalibData ? getBadCalibData() : getCalibData();
                 int len = Math.min(calib.length, size);
+                if (simulateShortCalibRead) {
+                    len -= 1;
+                }
                 System.arraycopy(calib, 0, buffer, offset, len);
                 return len;
 
             // Request for device ID - a fixed value
             case ID_REGISTER_ADDRESS:
+                if (simulateShortIdRead) {
+                    return 0; // Simulate missing byte
+                }
                 logger.log("Returning device ID = " + BMP180Device.DEVICE_ID);
                 buffer[offset] = BMP180Device.DEVICE_ID;
                 return 1;
@@ -181,6 +215,9 @@ class MockI2CDevice implements I2CDevice {
                         } catch (InterruptedException ex) {
                         }
                         // Answer 27898
+                        if (simulateShortTempRead) {
+                            return 1; // Simulate short read
+                        }
                         buffer[offset] = (byte) 0x6C;
                         buffer[offset + 1] = (byte) 0xFA;
                         return 2;
@@ -197,6 +234,9 @@ class MockI2CDevice implements I2CDevice {
                         } catch (InterruptedException ex) {
                         }
                         // Answer 6103808 (23843 << 8)
+                        if (simulateShortPressureRead) {
+                            return 2; // Simulate short read
+                        }
                         buffer[offset] = (byte) 0x5D;
                         buffer[offset + 1] = (byte) 0x23;
                         buffer[offset + 2] = (byte) 0x00;
@@ -215,6 +255,21 @@ class MockI2CDevice implements I2CDevice {
         throw new RuntimeException("Not yet implemented");
     }
 
+    @Override
+    public void ioctl(long command, int arg) throws IOException {
+        throw new RuntimeException("Not yet implemented");
+    }
+
+    @Override
+    public void ioctl(long command, ByteBuffer data, IntBuffer offsets) throws IOException {
+        throw new RuntimeException("Not yet implemented");
+    }
+
+    @Override
+    public int getAddress() {
+        return BMP180Device.DEVICE_I2C_ADDRESS;
+    }
+
     /*
      * Returns some mock calibration data (see device datasheet).
      */
@@ -223,6 +278,32 @@ class MockI2CDevice implements I2CDevice {
 
         try (DataOutputStream calibDataStream = new DataOutputStream(bos);) {
             calibDataStream.writeShort(408); // AC1
+            calibDataStream.writeShort(-72); // AC2
+            calibDataStream.writeShort(-14383); // AC3
+            calibDataStream.writeShort(32741); // AC4
+            calibDataStream.writeShort(32757); // AC5
+            calibDataStream.writeShort(23153); // AC6
+            calibDataStream.writeShort(6190); // B1
+            calibDataStream.writeShort(4); // B2
+            calibDataStream.writeShort(-32768); // MB
+            calibDataStream.writeShort(-8711); // MC
+            calibDataStream.writeShort(2868); // MD
+            calibDataStream.close();
+
+            return bos.toByteArray();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /*
+     * Returns bad mock calibration data (contains zeros).
+     */
+    private byte[] getBadCalibData() {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(22);
+
+        try (DataOutputStream calibDataStream = new DataOutputStream(bos);) {
+            calibDataStream.writeShort(0); // AC1 is bad
             calibDataStream.writeShort(-72); // AC2
             calibDataStream.writeShort(-14383); // AC3
             calibDataStream.writeShort(32741); // AC4
